@@ -1,9 +1,3 @@
----
-id: flutter
-title: Flutter SDK
-sidebar_label: Flutter
----
-
 ### MoneyHash Flutter Support
 The SDK allows you to build full payment experiences in your native Android and iOS apps using Flutter.
 
