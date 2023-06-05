@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:moneyhash_payment/data/intent_type.dart';
+import 'package:moneyhash_payment/data/intent_detais.dart';
 import 'package:moneyhash_payment/moneyhash_payment.dart';
 
 void main() {
@@ -14,7 +16,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  MoneyHashPaymentResult? _result;
+  var moneyhashSDK = MoneyHashSDKBuilder.build();
+  IntentDetails? _result = null;
+
   TextEditingController? paymentIdTextEditController = TextEditingController();
   String? errorText;
 
@@ -24,17 +28,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initPlatformState() async {
-    MoneyHashPaymentResult? result;
     try {
-      result = await MoneyhashPayment.startPaymentFlow(
-          paymentIdTextEditController!.text);
+      await moneyhashSDK.renderForm(
+          paymentIdTextEditController!.text, IntentType.payment);
     } on PlatformException {}
 
     if (!mounted) return;
-
-    setState(() {
-      _result = result;
-    });
   }
 
   @override
@@ -83,84 +82,6 @@ class _MyAppState extends State<MyApp> {
                       child: const Text("Checkout"),
                     ),
                   ),
-                  if (_result != null)
-                    Column(
-                      children: [
-                        const SizedBox(height: 32),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Payment Status  :  ',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                            Expanded(
-                              child: Text(
-                                  '${_result?.status ?? "no payment status"}\n'),
-                            )
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Payment Extra Actions  :  ',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                            Expanded(
-                                child: _result?.extraActions != null &&
-                                        _result?.extraActions != ""
-                                    ? Text('${_result?.extraActions}')
-                                    : const Text("no payment extra actions"))
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Payment Result ID :  ',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                            Expanded(
-                                child: Text(
-                                    '${_result?.result?.intent?.id ?? "no payment result id"}\n')),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Payment Result Amount :  ',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                            Expanded(
-                                child: Text(
-                                    '${_result?.result?.intent?.amountValue ?? "no payment result amount"}\n')),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Payment Result Selected Method :  ',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                            Expanded(
-                                child: Text(
-                                    '${_result?.result?.intent?.selectedMethod ?? "no payment result selected method"}\n')),
-                          ],
-                        ),
-                      ],
-                    ),
                 ],
               ),
             ),

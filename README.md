@@ -1,3 +1,5 @@
+# moneyhash_payment
+
 ### MoneyHash Flutter Support
 The SDK allows you to build full payment experiences in your native Android and iOS apps using Flutter.
 
@@ -5,125 +7,273 @@ The SDK allows you to build full payment experiences in your native Android and 
 
 dart pub add moneyhash_payment
 
-## Requirements
-### Android
+### Requirements
+
+## Android
 * Compatible with apps targeting Android 5.0 (API level 21) and above
-* Use Kotlin version 1.6.10 and above
+* Use Kotlin version 1.8.10 and above:
 * Using an up-to-date [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin)
 * [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
 
-Enable `databinding` in your project.
-
+Enable `viewBinding` in your project.
 ```
-dataBinding {
-  enabled = true
-}
+ buildFeatures {
+   viewBinding true
+ }
 ```
 
-### iOS
+## iOS
 Compatible with apps targeting iOS 11 or above.
 
-## Create a Payment Intent
-You will need to create a Payment Intent and use it's ID to initiate the SDK, There are two ways to create a Payment Intent:
+## How to use?
 
-- **Using The Sandbox**
+- Create moneyHash instance using `MoneyHashSDKBuilder`
 
-  Which is helpful to manually and quickly create a Payment Intent without having to running any backend code. For more information about the Sandbox refer to this [section](https://moneyhash.github.io/sandbox)
-- **Using The Payment Intent API**
+```dart
+import 'package:moneyhash_payment/moneyhash_payment.dart';
+MoneyHashSDK moneyhashSDK = MoneyHashSDKBuilder.build();
+```
 
-  This will be the way your backend server will eventually use to create a Payment Intents, for more information refer to this [section](https://moneyhash.github.io/api)
+> MoneyHash SDK guides to for the actions required to be done, to have seamless integration through intent details `state`
 
-### Usage Example
+| state                             | Action                                                                                                                                                                                          |
+| :-------------------------------- |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `METHOD_SELECTION`                | Use `moneyHash.getIntentMethod` to get different intent methods and render them natively with your own styles & use `moneyHash.proceedWithMethod` to proceed with one of them on user selection |
+| `INTENT_FORM`                     | Use `moneyHash.renderForm` to start the SDK flow to let MoneyHash handle the flow for you & listen for result by using IntentContract() for Activity result                                     |
+| `INTENT_PROCESSED`                | Render your successful confirmation UI with the intent details                                                                                                                                  |
+| `TRANSACTION_FAILED`              | Render your failure UI with the intent details                                                                                                                                                  |
+| `TRANSACTION_WAITING_USER_ACTION` | Render your pending actions confirmation UI with the intent details & `externalActionMessage` if exists on `Transaction`                                                                        |
+| `EXPIRED`                         | Render your intent expired UI                                                                                                                                                                   |
+| `CLOSED`                          | Render your intent closed UI                                                                                                                                                                    |
 
-To start the payment flow use the Payment Intent ID from the step above as a parameter along with a PaymentResultContract instance like below:
+- Get intent details based on the intent id and type (Payment/Payout)
 
-1- Add PaymentActivity to AndroidManifest.xml
+```dart
+try{
+  var result = await moneyhashSDK.getIntentDetails(intentId, IntentType.payment);
+} catch (e) {
+// Handle the errors
+}
+```
+
+- Get intent available payment/payout methods, saved cards and customer balances
+
+```dart
+try{
+  var result = await moneyhashSDK.getIntentMethods(intentId, IntentType.payment);
+} catch (e) {
+// Handle the errors
+}
+```
+
+- Proceed with a payment/payout method, card or wallet
+
+```dart
+    try {
+    var result = await moneyhashSDK.proceedWithMethod(
+              intentId,
+              IntentType.payment,
+              selectedMethodId,
+              MethodType.customerBalance, // method type that returned from the intent methods
+              MethodMetaData(// optional and can be null
+                  cvv: "123", // required for customer saved cards that requires cvv
+              )
+       );
+      } catch (e) {
+        // handle the error
+      }
+```
+
+- Reset the selected method on and intent to null
+> Can be used for `back` button after method selection  or `retry` button on failed transaction UI to try a different method by the user.
+```dart
+    try {
+          var result = await moneyhashSDK.resetSelectedMethod(intentId, IntentType.payment);
+      } catch (e) {
+          // handle the error
+      }
+```
+
+- Delete a customer saved card
+
+```dart
+    try {
+          await moneyhashSDK.deleteSavedCard(cardTokenId, intentSecret); // No result expected from this method success or failure
+      } catch (e) {
+          // handle the error
+      }
+```
+
+- Render SDK embed forms and payment/payout integrations
+
+> Must be called if `state` of an intent is `INTENT_FORM` to let MoneyHash handle the payment/payout. you can also use it directly to render the embed form for payment/payout without handling the methods selection native UI.
+
+Add PaymentActivity / PayoutActivity to AndroidManifest.xml
+
 ```xml
 <activity android:name="com.moneyhash.sdk.android.payment.PaymentActivity"
-android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
-```
-2-
-
-#### startPaymentFlow
-```dart
-import 'package:moneyhash_payment/moneyhash_payment.dart';
-
-    MoneyHashPaymentResult? result;
-
-    try {
-      result = await MoneyhashPayment.startPaymentFlow("YourPaymentIntentIdHere");
-    } on PlatformException {
-      // Handle the errors
-    }
-
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
 ```
 
-#### startPayoutFlow
-
-1- Add PaymentActivity to AndroidManifest.xml
 ```xml
 <activity android:name="com.moneyhash.sdk.android.payout.PayoutActivity"
-android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
 ```
-2-
 
+- Start the SDK flow to let MoneyHash handle the payment/payout
 ```dart
-import 'package:moneyhash_payment/moneyhash_payment.dart';
-
-    MoneyHashPayoutResult? result;
-
     try {
-      result = await MoneyhashPayment.startPayoutFlow("YourPayoutIntentIdHere");
-    } on PlatformException {
-      // Handle the errors
-    }
+          var result = await moneyhashSDK.renderForm(intentId, IntentType.payment);
+      } catch (e) {
+          // handle the error
+      }
 ```
 
-### Payment Statuses
-Once your customer finishes adding the payment information they will reach one of the following statuses, and  a callback is fired with the payment status which indicate the current status of your payment.
-
-| Status             | #                                                                                                                                                                                                                                      |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Error              | There was an error while processing the payment and more details about the errors will be found inside errors data.                                                                                                                    |
-| Success            | The payment is Successful.                                                                                                                                                                                                             |
-| RequireExtraAction | That payment flow is done and the customer needs to do some extra actions off the system, a list of the actions required by the customer will be found inside the actions data, and it should be rendered to the customer in your app. |
-| Failed             | There was an error while processing the payment.                                                                                                                                                                                       |
-| Unknown            | There was an unknown state received and this should be checked from your MoneyHash dashboard.                                                                                                                                          |
-| Cancelled          | The customer cancelled the payment flow by clicking back or cancel.                                                                                                                                                                    |
-| Redirect           | That payment flow is done and the customer needs to be redirect to `redirectUrl`.                                                                                                                                                      |
-
-### MoneyHashPaymentResult
-
+## Responses
 ```dart
-class MoneyHashPaymentResult {
-  final String status; // Payment Status
-  final String? errors; // errors if any (incase of status = "error")
-  final String? extraActions; // list of extra actions required (incase of status = "require_extra_action")
-  final String? redirectUrl; // link needs to be redirect to  (in case of status = "redirect")
-  final PaymentResult? result; // the payment details (in case of status = "success" || status = "redirect" ||status = "require_extra_action" || status = "failed")
+class CustomerBalance {
+  final double? balance;
+  final String? id;
+  final String? icon;
+  final bool? isSelected;
+  final MethodType? type;
 }
 
-class PaymentResult {
-  final PaymentIntent? intent;
-  final PaymentTransaction? transaction;
+class PaymentMethod {
+  final String? id;
+  final String? title;
+  final bool? isSelected;
+  final bool? confirmationRequired;
+  final List<String>? icons;
+  final MethodType? type;
 }
 
-```
-### MoneyHashPayoutResult
-
-```dart
-class MoneyHashPayoutResult {
-  final String status; // Payout Status
-  final String? errors; // errors if any (incase of status = "error")
-  final String? extraActions; // list of extra actions required (incase of status = "require_extra_action")
-  final String? redirectUrl; // link needs to be redirect to  (in case of status = "redirect")
-  final PayoutResult? result; // the payout details (in case of status = "success" || status = "redirect" || status = "require_extra_action" || status = "failed")
+class PayoutMethod {
+  final String? id;
+  final String? title;
+  final bool? isSelected;
+  final bool? confirmationRequired;
+  final List<String>? icons;
+  final MethodType? type;
 }
 
-class PayoutResult {
-  final PayoutIntent? intent;
-  final PayoutTransaction? transaction;
+class ExpressMethod {
+  final String? id;
+  final String? title;
+  final bool? isSelected;
+  final bool? confirmationRequired;
+  final List<String>? icons;
+  final MethodType? type;
 }
+
+class SavedCard {
+  final String? id;
+  final String? brand;
+  final String? last4;
+  final String? expiryMonth;
+  final String? expiryYear;
+  final String? country;
+  final String? logo;
+  final bool? requireCvv;
+  final CvvConfig? cvvConfig;
+  final MethodType? type;
+}
+
+class CvvConfig {
+  final int? digitsCount;
+}
+
+class IntentMethods {
+  final List<CustomerBalance>? customerBalances;
+  final List<PaymentMethod>? paymentMethods;
+  final List<ExpressMethod>? expressMethods;
+  final List<SavedCard>? savedCards;
+  final List<PayoutMethod>? payoutMethods;
+}
+
+enum MethodType {
+  expressMethod,
+  customerBalance,
+  savedCard,
+  paymentMethod,
+  payoutMethod,
+}
+
+class IntentDetails {
+  final String? selectedMethod;
+  final IntentData? intent;
+  final double? walletBalance;
+  final TransactionData? transaction;
+  final RedirectData? redirect;
+  final IntentState? state;
+}
+
+class TransactionData {
+  final String? billingData;
+  final double? amount;
+  final List<String>? externalActionMessage;
+  final String? amountCurrency;
+  final String? id;
+  final String? methodName;
+  final String? method;
+  final String? createdDate;
+  final String? status;
+  final String? customFields;
+  final String? providerTransactionFields;
+  final String? customFormAnswers;
+}
+
+class IntentData {
+  final AmountData? amount;
+  final String? secret;
+  final String? expirationDate;
+  final bool? isLive;
+  final String? id;
+  final IntentStatus? status;
+}
+
+class AmountData {
+  final String? value;
+  final double? formatted;
+  final String? currency;
+  final double? maxPayout;
+}
+
+class RedirectData {
+  final String? redirectUrl;
+}
+
+class IntentResult {
+  final IntentMethods? methods;
+  final IntentDetails? details;
+}
+
+enum IntentType {
+  payment,
+  payout
+}
+
+class MethodMetaData {
+  final String? cvv;
+}
+
+enum IntentStatus {
+  processed,
+  unProcessed,
+  timeExpired,
+  closed,
+}
+
+enum IntentState {
+  methodSelection,
+  intentForm,
+  intentProcessed,
+  transactionWaitingUserAction,
+  transactionFailed,
+  expired,
+  closed,
+}
+
 ```
 
 
