@@ -119,10 +119,10 @@ packages:
     dependency: "direct main"
     description:
       name: moneyhash_payment
-      sha256: "4ac8a6a3f0296ced7238ff195c4240595dc38b6cfcedbcc0c7222469a7f51fe6"
+      sha256: "5614212da873e16898cfd53673de262068e3642e69136d66ce3b916c09f633d4"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.2"
   path:
     dependency: transitive
     description:

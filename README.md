@@ -15,13 +15,22 @@ dart pub add moneyhash_payment
 * Using an up-to-date [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin)
 * [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
 
-Enable `viewBinding` in your project.
+* Enable `viewBinding` in your project.
 ```
  buildFeatures {
    viewBinding true
  }
 ```
 
+* Change the MainActivity to extend `FlutterFragmentActivity` instead of `FlutterActivity` in `android/app/src/main/kotlin/.../MainActivity.kt`:
+* 
+```kotlin
+import io.flutter.embedding.android.FlutterFragmentActivity
+
+class MainActivity:  FlutterFragmentActivity()
+```
+
+```kotlin
 ## iOS
 Compatible with apps targeting iOS 11 or above.
 
