@@ -30,7 +30,7 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 class MainActivity:  FlutterFragmentActivity()
 ```
 
-```kotlin
+
 ## iOS
 Compatible with apps targeting iOS 11 or above.
 
