@@ -23,7 +23,7 @@ dart pub add moneyhash_payment
 ```
 
 * Change the MainActivity to extend `FlutterFragmentActivity` instead of `FlutterActivity` in `android/app/src/main/kotlin/.../MainActivity.kt`:
-* 
+
 ```kotlin
 import io.flutter.embedding.android.FlutterFragmentActivity
 
