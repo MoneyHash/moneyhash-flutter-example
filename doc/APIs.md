@@ -1,6 +1,6 @@
 
 
-# MoneyHash SDK API Documentation 
+# MoneyHash SDK API Documentation
 
 The MoneyHash SDK for Flutter offers a comprehensive suite of APIs for managing payment intents, handling various payment methods, and processing transactions. The following documentation details the available methods within the `MoneyHashSDK` class.
 
@@ -20,16 +20,16 @@ Future<IntentDetails?> renderForm(
 
 - **Purpose**: Renders the MoneyHash embed form within the Flutter application.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `intentType`: The type of the intent (`IntentType`), either payment or payout.
-  - `embedStyle`: Optional styling configuration for the embed form.
+    - `intentId`: The unique identifier of the intent.
+    - `intentType`: The type of the intent (`IntentType`), either payment or payout.
+    - `embedStyle`: Optional styling configuration for the embed form.
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
 - **Example**:
 
 ```dart
 try {
     var intentDetails = await moneyHashSDK.renderForm(
-        "Z1ED7zZ",
+        "current intent id",
         IntentType.payment,
         null,  // Optional EmbedStyle
     );
@@ -49,8 +49,8 @@ Future<IntentMethods> getIntentMethods(String intentId, IntentType intentType)
 
 - **Purpose**: Retrieves available payment methods for a specified intent.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `intentType`: The type of the intent (`IntentType`), either payment or payout.
+    - `intentId`: The unique identifier of the intent.
+    - `intentType`: The type of the intent (`IntentType`), either payment or payout.
 - **Returns**: `IntentMethods` containing available methods.
 - **Example**:
 
@@ -73,8 +73,8 @@ Future<IntentDetails> getIntentDetails(String intentId, IntentType intentType)
 
 - **Purpose**: Retrieves the details of a specified intent.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `intentType`: The type of the intent (`IntentType`), either payment or payout.
+    - `intentId`: The unique identifier of the intent.
+    - `intentType`: The type of the intent (`IntentType`), either payment or payout.
 - **Returns**: `IntentDetails`.
 - **Example**:
 
@@ -97,8 +97,8 @@ Future<void> deleteSavedCard(String cardTokenId, String intentSecret)
 
 - **Purpose**: Deletes a saved card using its token ID and associated intent secret.
 - **Parameters**:
-  - `cardTokenId`: The token ID of the card to be deleted.
-  - `intentSecret`: The secret associated with the intent.
+    - `cardTokenId`: The token ID of the card to be deleted.
+    - `intentSecret`: The secret associated with the intent.
 - **Example**:
 
 ```dart
@@ -120,8 +120,8 @@ Future<IntentResult> resetSelectedMethod(String intentId, IntentType intentType)
 
 - **Purpose**: Resets the selected payment or payout method for a specified intent.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `intentType`: The type of the intent (`IntentType`), either payment or payout.
+    - `intentId`: The unique identifier of the intent.
+    - `intentType`: The type of the intent (`IntentType`), either payment or payout.
 - **Returns**: `IntentResult` with the reset result.
 - **Example**:
 
@@ -150,11 +150,11 @@ Future<IntentResult> proceedWithMethod(
 
 - **Purpose**: Proceeds with the selected payment or payout method for a given intent.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `intentType`: The type of the intent (`IntentType`), either payment or payout.
-  - `selectedMethodId`: The ID of the selected method.
-  - `methodType`: The type of the method (`MethodType`).
-  - `methodMetaData`: Optional metadata related to the method.
+    - `intentId`: The unique identifier of the intent.
+    - `intentType`: The type of the intent (`IntentType`), either payment or payout.
+    - `selectedMethodId`: The ID of the selected method.
+    - `methodType`: The type of the method (`MethodType`).
+    - `methodMetaData`: Optional metadata related to the method.
 - **Returns**: `IntentResult` encapsulating the result of the method selection.
 - **Example**:
 
@@ -189,11 +189,11 @@ Future<IntentDetails?> submitForm(
 
 - **Purpose**: Submits a form with selected method and optional billing and shipping data.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `selectedMethodId`: The ID of the selected payment method.
-  - `billingData`: Optional billing details.
-  - `shippingData`: Optional shipping details.
-  - `cardData`: Data from card tokenization (if applicable).
+    - `intentId`: The unique identifier of the intent.
+    - `selectedMethodId`: The ID of the selected payment method.
+    - `billingData`: Optional billing details.
+    - `shippingData`: Optional shipping details.
+    - `cardData`: Data from card tokenization (if applicable).
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
 - **Example**:
 
@@ -222,8 +222,8 @@ Future<IntentDetails?> submitCardCVV(String intentId, String cvv)
 
 - **Purpose**: Submits the CVV for a card associated with a specified intent.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `cvv`: The CVV of the card.
+    - `intentId`: The unique identifier of the intent.
+    - `cvv`: The CVV of the card.
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
 - **Example**:
 
@@ -246,7 +246,7 @@ void setLogLevel(LogLevel logLevel)
 
 - **Purpose**: Sets the logging level for the SDK.
 - **Parameters**:
-  - `logLevel`: The desired logging level.
+    - `logLevel`: The desired logging level.
 - **Example**:
 
 ```dart
@@ -264,8 +264,8 @@ Future<IntentDetails?> submitPaymentReceipt(String intentId, String data)
 
 - **Purpose**: Submits a payment receipt for a specified intent.
 - **Parameters**:
-  - `intentId`: The unique identifier of the payment intent.
-  - `data`: The receipt data to be submitted.
+    - `intentId`: The unique identifier of the payment intent.
+    - `data`: The receipt data to be submitted.
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
 - **Example**:
 
@@ -282,6 +282,9 @@ try {
 
 #### 11. Proceed with Apple Pay
 
+> [!IMPORTANT]  
+> This method is only available on iOS.
+
 ```dart
 Future<IntentDetails?> proceedWithApplePay(
     String intentId,
@@ -294,11 +297,11 @@ Future<IntentDetails?> proceedWithApplePay(
 
 - **Purpose**: Initiates an Apple Pay transaction.
 - **Parameters**:
-  - `intentId`: The unique identifier of the intent.
-  - `depositAmount`: The amount to be paid.
-  - `merchantIdentifier`: A unique identifier for the merchant.
-  - `currencyCode`: The currency code of the transaction (e.g., "USD").
-  - `countryCode`: The country code associated with the transaction (e.g., "US").
+    - `intentId`: The unique identifier of the intent.
+    - `depositAmount`: The amount to be paid.
+    - `merchantIdentifier`: A unique identifier for the merchant.
+    - `currencyCode`: The currency code of the transaction (e.g., "USD").
+    - `countryCode`: The country code associated with the transaction (e.g., "US").
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
 - **Example**:
 
@@ -317,6 +320,24 @@ try {
 } catch (e) {
     print("Error initiating Apple Pay transaction: $e");
 }
+```
+
+#### 12. is Device compatible with Apple Pay
+
+> [!IMPORTANT]  
+> This method is only available on iOS.
+
+```dart
+Future<bool> isDeviceCompatibleWithApplePay()
+```
+
+- **Purpose**: Checks if the current device is compatible with Apple Pay.
+- **Returns**: A `bool` indicating whether the device supports Apple Pay (true if compatible, false otherwise).
+- **Example**:
+
+```dart
+    var isCompatible = await moneyHashSDK.isDeviceCompatibleWithApplePay();
+    print("Device is compatible with Apple Pay: $isCompatible");
 ```
 
 ---

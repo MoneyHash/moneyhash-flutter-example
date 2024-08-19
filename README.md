@@ -1,290 +1,287 @@
-# moneyhash_payment
 
-### MoneyHash Flutter Support
-The SDK allows you to build full payment experiences in your native Android and iOS apps using Flutter.
+# How to use MoneyHash V2 Flutter
 
-### Installation
+Welcome to the MoneyHash SDK documentation for Flutter! This guide provides an overview of the core functionalities of the MoneyHash SDK, including intent states, API methods, and models.
 
-dart pub add moneyhash_payment
+---
 
-### Requirements
+### Intent States and Corresponding Actions
 
-## Android
-* Compatible with apps targeting Android 5.0 (API level 21) and above
-* Use Kotlin version 1.8.10 and above:
-* Using an up-to-date [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin)
-* [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
+Here's a summary of the different intent states defined in the Flutter SDK and the actions associated with them:
 
-* Enable `viewBinding` in your project.
-```
- buildFeatures {
-   viewBinding true
- }
-```
+| State                              | Action                                                                                                                                                                                                                                                          |
+| :--------------------------------- |:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **MethodSelection**                | [Handle this state](#how-to-handle-method-selection) by rendering the payment methods provided in `methods`. After user selection, proceed with the selected method by calling [`moneyHashSDK.proceedWithMethod`](doc/APIs.md#6-proceed-with-selected-method). |
+| **FormFields**                     | [Handle this state](#handling-the-formfields-state) by rendering form fields from `billingFields`, `shippingFields`, and `tokenizeCardInfo`. Submit the completed data using [`moneyHashSDK.submitForm`](doc/APIs.md#7-submit-form).                           |
+| **UrlToRender**                    | Use the [`moneyHashSDK.renderForm`](doc/APIs.md#1-render-moneyhash-embed-form) to display the MoneyHash embed form based on the URL provided. Handle the form submission results through the provided `completionHandler`.                                     |
+| **SavedCardCVV**                   | Render a CVV input field using `cvvField`. Optionally, display card information from [`cardTokenData`](doc/Models.md#3-cardtokendata). Submit the CVV using [`moneyHashSDK.submitCardCVV`](doc/APIs.md#8-submit-card-cvv).                                         |
+| **IntentForm**                     | Display the MoneyHash embed form using [`moneyHashSDK.renderForm`](doc/APIs.md#1-render-moneyhash-embed-form). Monitor the form submission outcome with `completionHandler`.                                                                                   |
+| **IntentProcessed**                | Render a success confirmation UI indicating the payment or payout completion with provided intent details.                                                                                                                                                      |
+| **TransactionWaitingUserAction**   | Show a UI element indicating the transaction awaits user action. If available, show any external action message required from `Transaction`.                                                                                                                    |
+| **TransactionFailed**              | Display a UI element indicating transaction failure. If `recommendedMethods` are provided, show these as alternative options for the user to retry the payment or payout.                                                                                       |
+| **Expired**                        | Show a message indicating that the intent has expired, prompting the user to initiate a new transaction.                                                                                                                                                        |
+| **Closed**                         | Show a message indicating that the intent has been closed and no further actions can be taken.                                                                                                                                                                  |
 
-* Change the MainActivity to extend `FlutterFragmentActivity` instead of `FlutterActivity` in `android/app/src/main/kotlin/.../MainActivity.kt`:
+---
 
-```kotlin
-import io.flutter.embedding.android.FlutterFragmentActivity
+### How to Handle Method Selection
 
-class MainActivity:  FlutterFragmentActivity()
-```
+Handling method selection is a crucial part of integrating the MoneyHash SDK. This process involves rendering available payment methods and managing the user's choice. Here's how you can handle method selection effectively:
 
+#### Steps to Handle Method Selection
 
-## iOS
-Compatible with apps targeting iOS 11 or above.
+1. **Display Payment Methods**:
+    - When the SDK state is `MethodSelection`, extract the `methods` object which contains the available payment options for the intent.
+    - Use your UI components to render these payment methods in a list or grid format, allowing the user to choose one.
 
-## How to use?
+2. **Capture User Selection**:
+    - Implement an interactive element for each payment method. When a user selects a method, capture this selection and prepare to proceed with that method.
 
-- Create moneyHash instance using `MoneyHashSDKBuilder`
+3. **Proceed with the Selected Method**:
+    - Use the [`moneyHashSDK.proceedWithMethod`](doc/APIs.md#6-proceed-with-selected-method) API call to initiate the payment process with the selected method.
+    - Pass the necessary parameters, such as `intentId`, `intentType`, `selectedMethodId`, and `methodType` to this function. Optionally, include any `methodMetaData` if required by the payment process.
 
-```dart
-import 'package:moneyhash_payment/moneyhash_payment.dart';
-MoneyHashSDK moneyhashSDK = MoneyHashSDKBuilder.build();
-```
+#### Example Implementation
 
-> MoneyHash SDK guides to for the actions required to be done, to have seamless integration through intent details `state`
-
-| state                             | Action                                                                                                                                                                                          |
-| :-------------------------------- |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `METHOD_SELECTION`                | Use `moneyHash.getIntentMethod` to get different intent methods and render them natively with your own styles & use `moneyHash.proceedWithMethod` to proceed with one of them on user selection |
-| `INTENT_FORM`                     | Use `moneyHash.renderForm` to start the SDK flow to let MoneyHash handle the flow for you & listen for result by using IntentContract() for Activity result                                     |
-| `INTENT_PROCESSED`                | Render your successful confirmation UI with the intent details                                                                                                                                  |
-| `TRANSACTION_FAILED`              | Render your failure UI with the intent details                                                                                                                                                  |
-| `TRANSACTION_WAITING_USER_ACTION` | Render your pending actions confirmation UI with the intent details & `externalActionMessage` if exists on `Transaction`                                                                        |
-| `EXPIRED`                         | Render your intent expired UI                                                                                                                                                                   |
-| `CLOSED`                          | Render your intent closed UI                                                                                                                                                                    |
-
-- Get intent details based on the intent id and type (Payment/Payout)
-
-```dart
-try{
-  var result = await moneyhashSDK.getIntentDetails(intentId, IntentType.payment);
-} catch (e) {
-// Handle the errors
-}
-```
-
-- Get intent available payment/payout methods, saved cards and customer balances
-
-```dart
-try{
-  var result = await moneyhashSDK.getIntentMethods(intentId, IntentType.payment);
-} catch (e) {
-// Handle the errors
-}
-```
-
-- Proceed with a payment/payout method, card or wallet
+Here’s an example of how you might implement this in your Flutter application:
 
 ```dart
     try {
-    var result = await moneyhashSDK.proceedWithMethod(
-              intentId,
-              IntentType.payment,
-              selectedMethodId,
-              MethodType.customerBalance, // method type that returned from the intent methods
-              MethodMetaData(// optional and can be null
-                  cvv: "123", // required for customer saved cards that requires cvv
-              )
-       );
-      } catch (e) {
-        // handle the error
-      }
+      // Assume you have already defined 'intentId' and 'intentType'
+      var result = await moneyHashSDK.proceedWithMethod(
+        intentId: "currentIntentId",
+        intentType: IntentType.payment, // or payout based on your application flow
+        selectedMethodId: method.id,
+        methodType: method.type,
+      );
+      print("Method proceeded successfully: $result");
+    } catch (e) {
+      print("Error proceeding with method: $e");
+    }
 ```
 
-- Reset the selected method on and intent to null
-> Can be used for `back` button after method selection  or `retry` button on failed transaction UI to try a different method by the user.
+This function builds a list where each payment method is represented by a list tile in the UI. When a user taps on a method, the [`proceedWithMethod`](doc/APIs.md#6-proceed-with-selected-method) function is called, using the details of the selected method to proceed with the payment process.
+
+---
+### Handling the `formFields` State
+
+When handling the `FormFields` state in MoneyHash, you will deal with two primary scenarios: managing billing or shipping data and handling card tokenization. These scenarios are broken down into steps for clarity.
+
+#### Handling Billing or Shipping Data
+
+1. **Rendering Input Fields**:
+    - Use `InputField` data to render form fields. Each field type corresponds to an attribute like name, address, etc., and comes with specific properties to guide the rendering.
+
+2. **Collecting User Input**:
+    - Capture input from these fields in the form of map of key as the field name and value is the user value.
+
+Example of handling billing data:
 ```dart
-    try {
-          var result = await moneyhashSDK.resetSelectedMethod(intentId, IntentType.payment);
-      } catch (e) {
-          // handle the error
-      }
+Map<String, String> billingData = {
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com"
+};
 ```
 
-- Delete a customer saved card
+Handling card tokenization effectively within the MoneyHash SDK for Flutter involves a few critical steps that integrate secure data handling with user interaction. Below, We'll outline a comprehensive approach using the `SecureTextField` and `CardCollector` classes to manage card data securely.
+
+---
+
+### Handling Card Tokenization
+
+#### Overview
+Card tokenization in the MoneyHash SDK involves capturing sensitive card information securely and converting it into a token that can be safely stored and transmitted. This process reduces PCI compliance requirements and enhances security.
+
+### Step 1: Configure the Card Form Builder
+
+This step involves initializing the `CardFormBuilder` and setting up listeners for each card field. These listeners will handle real-time validation and state updates for each input.
 
 ```dart
-    try {
-          await moneyhashSDK.deleteSavedCard(cardTokenId, intentSecret); // No result expected from this method success or failure
-      } catch (e) {
-          // handle the error
-      }
+CardFormBuilder configureCardFormBuilder() {
+    // Initialize the builder
+    CardFormBuilder cardFormBuilder = CardFormBuilder();
+
+    // Set up listeners for each field
+    cardFormBuilder
+        .setCardNumberField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Card number is valid");
+          } else {
+            print("Card number error: ${state?.errorMessage}");
+          }
+        })
+        .setCVVField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("CVV is valid");
+          } else {
+            print("CVV error: ${state?.errorMessage}");
+          }
+        })
+        .setCardHolderNameField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Card holder name is valid");
+          } else {
+            print("Card holder name error: ${state?.errorMessage}");
+          }
+        })
+        .setExpiryMonthField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Expiry month is valid");
+          } else {
+            print("Expiry month error: ${state?.errorMessage}");
+          }
+        })
+        .setExpiryYearField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Expiry year is valid");
+          } else {
+            print("Expiry year error: ${state?.errorMessage}");
+          }
+        });
+
+    // Assume TokenizeCardInfo is previously defined and set it
+    TokenizeCardInfo tokenizeCardInfo = TokenizeCardInfo(/* parameters */);
+    cardFormBuilder.setTokenizeCardInfo(tokenizeCardInfo);
+
+    return cardFormBuilder;
+}
 ```
 
-- Render SDK embed forms and payment/payout integrations
+### Step 2: Build the Card Collector
 
-> Must be called if `state` of an intent is `INTENT_FORM` to let MoneyHash handle the payment/payout. you can also use it directly to render the embed form for payment/payout without handling the methods selection native UI.
+After configuring the `CardFormBuilder`, the next step is to build the `CardCollector` from it. The `CardCollector` aggregates all card data fields and manages their states, allowing for secure data collection.
 
-Add PaymentActivity / PayoutActivity to AndroidManifest.xml
-
-```xml
-<activity android:name="com.moneyhash.sdk.android.payment.PaymentActivity"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
-```
-
-```xml
-<activity android:name="com.moneyhash.sdk.android.payout.PayoutActivity"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
-```
-
-- Start the SDK flow to let MoneyHash handle the payment/payout
 ```dart
-    try {
-          var result = await moneyhashSDK.renderForm(intentId, IntentType.payment);
-      } catch (e) {
-          // handle the error
-      }
+CardCollector buildCardCollector(CardFormBuilder cardFormBuilder) {
+    // Build the CardCollector from the configured CardFormBuilder
+    CardCollector cardCollector = cardFormBuilder.build();
+
+    return cardCollector;
+}
 ```
 
-## Responses
+3. **Implement Secure Text Fields:**
+    - For each card detail (holder name, number, CVV, expiry year, expiry month), implement a `SecureTextField` that binds to the `CardCollector`.
+    - `SecureTextField` should handle user inputs, validate them, and update their respective field state in the `CardCollector`.
+
+4. **Collect and Validate Data:**
+    - Before attempting to tokenize the card data, validate all fields using the `CardCollector`'s `isValid` method.
+    - If validation passes, proceed to collect the data for tokenization.
+
+5. **Tokenize and Handle Response:**
+    - Call the `collect` method on the `CardCollector` to initiate the tokenization process.
+    - Handle the response which includes either a token (on success) or error handling logic (on failure).
+
+#### Example Implementation
+
 ```dart
-class CustomerBalance {
-  final double? balance;
-  final String? id;
-  final String? icon;
-  final bool? isSelected;
-  final MethodType? type;
-}
+class CardDetailsForm extends StatelessWidget {
+  final CardCollector cardCollector;
 
-class PaymentMethod {
-  final String? id;
-  final String? title;
-  final bool? isSelected;
-  final bool? confirmationRequired;
-  final List<String>? icons;
-  final MethodType? type;
-}
+  CardDetailsForm({Key? key, required this.cardCollector}) : super(key: key);
 
-class PayoutMethod {
-  final String? id;
-  final String? title;
-  final bool? isSelected;
-  final bool? confirmationRequired;
-  final List<String>? icons;
-  final MethodType? type;
-}
+  @override
+  Widget build(BuildContext context) {
+    // Card number field
+    SecureTextField cardNumberField = SecureTextField(
+      cardFormCollector: cardCollector,
+      type: CardFieldType.cardNumber,
+      placeholder: "Card Number",
+      label: "Card Number",
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+    );
+    
+    // Card holder name field
+    SecureTextField cardHolderNameField = SecureTextField(
+      cardFormCollector: cardCollector,
+      type: CardFieldType.cardHolderName,
+      placeholder: "Card Holder Name",
+      label: "Card Holder Name",
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+    );
 
-class ExpressMethod {
-  final String? id;
-  final String? title;
-  final bool? isSelected;
-  final bool? confirmationRequired;
-  final List<String>? icons;
-  final MethodType? type;
-}
+    // CVV field
+    SecureTextField cvvField = SecureTextField(
+      cardFormCollector: cardCollector,
+      type: CardFieldType.cvv,
+      placeholder: "CVV",
+      label: "CVV",
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+    );
 
-class SavedCard {
-  final String? id;
-  final String? brand;
-  final String? last4;
-  final String? expiryMonth;
-  final String? expiryYear;
-  final String? country;
-  final String? logo;
-  final bool? requireCvv;
-  final CvvConfig? cvvConfig;
-  final MethodType? type;
-}
+    // Expiry month field
+    SecureTextField expiryMonthField = SecureTextField(
+      cardFormCollector: cardCollector,
+      type: CardFieldType.expiryMonth,
+      placeholder: "MM",
+      label: "Expiry Month",
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+    );
+    
+        // Expiry year field
+    SecureTextField expiryYearField = SecureTextField(
+      cardFormCollector: cardCollector,
+      type: CardFieldType.expiryYear,
+      placeholder: "YY",
+      label: "Expiry Year",
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.done,
+    );
 
-class CvvConfig {
-  final int? digitsCount;
+    return Column(
+      children: [
+        cardNumberField,
+        cardHolderNameField,
+        cvvField,
+        expiryMonthField,
+        expiryYearField,
+        ElevatedButton(
+          onPressed: () async {
+            if (await cardCollector.isValid()) {
+              try {
+                VaultData? vaultData = await cardCollector.collect("intentId");
+                print("Tokenization successful: ${vaultData?.cardScheme}");
+              } catch (e) {
+                print("Tokenization failed: $e");
+              }
+            } else {
+              print("Validation failed");
+            }
+          },
+          child: Text('Tokenize and Submit'),
+        ),
+      ],
+    );
+  }
 }
-
-class IntentMethods {
-  final List<CustomerBalance>? customerBalances;
-  final List<PaymentMethod>? paymentMethods;
-  final List<ExpressMethod>? expressMethods;
-  final List<SavedCard>? savedCards;
-  final List<PayoutMethod>? payoutMethods;
-}
-
-enum MethodType {
-  expressMethod,
-  customerBalance,
-  savedCard,
-  paymentMethod,
-  payoutMethod,
-}
-
-class IntentDetails {
-  final String? selectedMethod;
-  final IntentData? intent;
-  final double? walletBalance;
-  final TransactionData? transaction;
-  final RedirectData? redirect;
-  final IntentState? state;
-}
-
-class TransactionData {
-  final String? billingData;
-  final double? amount;
-  final List<String>? externalActionMessage;
-  final String? amountCurrency;
-  final String? id;
-  final String? methodName;
-  final String? method;
-  final String? createdDate;
-  final String? status;
-  final String? customFields;
-  final String? providerTransactionFields;
-  final String? customFormAnswers;
-}
-
-class IntentData {
-  final AmountData? amount;
-  final String? secret;
-  final String? expirationDate;
-  final bool? isLive;
-  final String? id;
-  final IntentStatus? status;
-}
-
-class AmountData {
-  final String? value;
-  final double? formatted;
-  final String? currency;
-  final double? maxPayout;
-}
-
-class RedirectData {
-  final String? redirectUrl;
-}
-
-class IntentResult {
-  final IntentMethods? methods;
-  final IntentDetails? details;
-}
-
-enum IntentType {
-  payment,
-  payout
-}
-
-class MethodMetaData {
-  final String? cvv;
-}
-
-enum IntentStatus {
-  processed,
-  unProcessed,
-  timeExpired,
-  closed,
-}
-
-enum IntentState {
-  methodSelection,
-  intentForm,
-  intentProcessed,
-  transactionWaitingUserAction,
-  transactionFailed,
-  expired,
-  closed,
-}
-
 ```
 
+#### Explanation:
+- **SecureTextField Widgets**: Each field is implemented as a `SecureTextField`, which is tied to the `CardCollector`. The fields handle user input, with the card number, card holder name, CVV, and expiry year, expiry month managed separately.
+- **Validation and Tokenization**: Before tokenization, the form checks if all fields are valid. If valid, it proceeds with tokenization; otherwise, it alerts the user to correct the inputs.
+- **Handling Responses**: Upon successful tokenization, the token is printed or used as needed. If tokenization fails, the error is handled appropriately.
+
+This implementation ensures that card details are handled securely, following best practices for sensitive data management and compliance with security standards.
+---
+
+### Overview of MoneyHash APIs
+
+For a detailed guide to all available APIs in the MoneyHash SDK for Flutter, including parameters, return types, and usage examples, refer to [this](doc/APIs.md) document. This includes methods for handling payments, retrieving intent details, submitting forms, and more.
+
+---
+
+### Overview of MoneyHash Models
+
+The MoneyHash SDK for Flutter features various models to represent data structures like intents, payment methods, transactions, and card information. For comprehensive details on these models, including their properties and usage within the SDK, see the [this](doc/Models.md) document.
+
+---
+
+This documentation provides a comprehensive overview of integrating and utilizing the MoneyHash SDK in your Flutter applications. For more detailed information, please refer to the linked documentation files.
 
 ### Questions and Issues
 
