@@ -24,6 +24,7 @@ Future<IntentDetails?> renderForm(
     - `intentType`: The type of the intent (`IntentType`), either payment or payout.
     - `embedStyle`: Optional styling configuration for the embed form.
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
+- **Throws**: An `MHException` if something went wrong while rendering the intent.
 - **Example**:
 
 ```dart
@@ -52,6 +53,7 @@ Future<IntentMethods> getIntentMethods(String intentId, IntentType intentType)
     - `intentId`: The unique identifier of the intent.
     - `intentType`: The type of the intent (`IntentType`), either payment or payout.
 - **Returns**: `IntentMethods` containing available methods.
+- **Throws**: An `MHException` if failed to retrieve the methods.
 - **Example**:
 
 ```dart
@@ -76,6 +78,7 @@ Future<IntentDetails> getIntentDetails(String intentId, IntentType intentType)
     - `intentId`: The unique identifier of the intent.
     - `intentType`: The type of the intent (`IntentType`), either payment or payout.
 - **Returns**: `IntentDetails`.
+- **Throws**: An `MHException` if failed to retrieve the intent details.
 - **Example**:
 
 ```dart
@@ -99,6 +102,7 @@ Future<void> deleteSavedCard(String cardTokenId, String intentSecret)
 - **Parameters**:
     - `cardTokenId`: The token ID of the card to be deleted.
     - `intentSecret`: The secret associated with the intent.
+- **Throws**: An `MHException` if failed to to delete the card.
 - **Example**:
 
 ```dart
@@ -123,6 +127,7 @@ Future<IntentResult> resetSelectedMethod(String intentId, IntentType intentType)
     - `intentId`: The unique identifier of the intent.
     - `intentType`: The type of the intent (`IntentType`), either payment or payout.
 - **Returns**: `IntentResult` with the reset result.
+- **Throws**: An `MHException` if failed to to reset the selected method.
 - **Example**:
 
 ```dart
@@ -156,6 +161,7 @@ Future<IntentResult> proceedWithMethod(
     - `methodType`: The type of the method (`MethodType`).
     - `methodMetaData`: Optional metadata related to the method.
 - **Returns**: `IntentResult` encapsulating the result of the method selection.
+- **Throws**: An `MHException` if failed to to proceed with the selected method.
 - **Example**:
 
 ```dart
@@ -195,6 +201,7 @@ Future<IntentDetails?> submitForm(
     - `shippingData`: Optional shipping details.
     - `cardData`: Data from card tokenization (if applicable).
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
+- **Throws**: An `MHException` if failed to to submit the form data.
 - **Example**:
 
 ```dart
@@ -225,6 +232,7 @@ Future<IntentDetails?> submitCardCVV(String intentId, String cvv)
     - `intentId`: The unique identifier of the intent.
     - `cvv`: The CVV of the card.
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
+- **Throws**: An `MHException` if failed to to submit the cvv.
 - **Example**:
 
 ```dart
@@ -267,6 +275,7 @@ Future<IntentDetails?> submitPaymentReceipt(String intentId, String data)
     - `intentId`: The unique identifier of the payment intent.
     - `data`: The receipt data to be submitted.
 - **Returns**: `IntentDetails` if successful, `null` otherwise.
+- **Throws**: An `MHException` if failed to to submit the receipt.
 - **Example**:
 
 ```dart
@@ -288,7 +297,7 @@ try {
 ```dart
 Future<IntentDetails?> proceedWithApplePay(
     String intentId,
-    Float depositAmount,
+    double depositAmount,
     String merchantIdentifier,
     String currencyCode,
     String countryCode
@@ -302,13 +311,14 @@ Future<IntentDetails?> proceedWithApplePay(
     - `merchantIdentifier`: A unique identifier for the merchant.
     - `currencyCode`: The currency code of the transaction (e.g., "USD").
     - `countryCode`: The country code associated with the transaction (e.g., "US").
-- **Returns**: `IntentDetails` if successful, `null` otherwise.
+- **Returns**: `IntentDetails` if successful, error with details if otherwise.
+- **Throws**: An `MHException` if failed to to proceed with ApplePay.
 - **Example**:
 
 ```dart
 try {
     var intentDetails = await moneyHashSDK.proceedWithApplePay(
-        "Z1ED7zZ",
+        "intent id here",
         99.99,
         "merchant.com.example",
         "USD",
@@ -340,6 +350,45 @@ Future<bool> isDeviceCompatibleWithApplePay()
     print("Device is compatible with Apple Pay: $isCompatible");
 ```
 
----
+#### 13. Set Locale
 
-This documentation provides Flutter developers with all necessary details to integrate the MoneyHash SDK into their applications efficiently, matching the functionality offered in the iOS version.
+```dart
+void setLocale(Language locale)
+```
+- **Purpose**: Sets the locale for the SDK.
+- **Parameters**
+  - `locale`: The Language object representing the locale to be set.
+
+#### 14. Update Fees
+
+```dart
+Future<FeesData?> updateFees(
+String intentId,
+List<FeeItem> fees
+)
+```
+- **Purpose**: Updates the fees associated with a specified intent.
+- **Parameters**
+  - `intentId`: The unique identifier of the intent.
+  - `fees`: A list of `FeeItem` objects representing the fees to be updated.
+
+- **Returns**: `FeesData` if successful
+- **Throws**: An `MHException` if the fees cannot be updated.
+
+#### 15. Update Discount
+
+```dart
+Future<DiscountData?> updateDiscount(
+String intentId,
+DiscountItem discount
+)
+```
+- **Purpose**: Updates the discount associated with a specified intent.
+- **Parameters**
+  - `intentId`: The unique identifier of the intent.
+  - `discount`: A `DiscountItem` object representing the discount to be updated.
+
+- **Returns**: `DiscountData` if successful
+- **Throws**: An `MHException` if the fees cannot be updated.
+
+---

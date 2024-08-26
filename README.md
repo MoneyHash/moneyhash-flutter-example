@@ -9,18 +9,18 @@ Welcome to the MoneyHash SDK documentation for Flutter! This guide provides an o
 
 Here's a summary of the different intent states defined in the Flutter SDK and the actions associated with them:
 
-| State                              | Action                                                                                                                                                                                                                                                          |
-| :--------------------------------- |:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| State                              | Action                                                                                                                                                                                                                                                         |
+| :--------------------------------- |:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **MethodSelection**                | [Handle this state](#how-to-handle-method-selection) by rendering the payment methods provided in `methods`. After user selection, proceed with the selected method by calling [`moneyHashSDK.proceedWithMethod`](doc/APIs.md#6-proceed-with-selected-method). |
 | **FormFields**                     | [Handle this state](#handling-the-formfields-state) by rendering form fields from `billingFields`, `shippingFields`, and `tokenizeCardInfo`. Submit the completed data using [`moneyHashSDK.submitForm`](doc/APIs.md#7-submit-form).                           |
-| **UrlToRender**                    | Use the [`moneyHashSDK.renderForm`](doc/APIs.md#1-render-moneyhash-embed-form) to display the MoneyHash embed form based on the URL provided. Handle the form submission results through the provided `completionHandler`.                                     |
-| **SavedCardCVV**                   | Render a CVV input field using `cvvField`. Optionally, display card information from [`cardTokenData`](doc/Models.md#3-cardtokendata). Submit the CVV using [`moneyHashSDK.submitCardCVV`](doc/APIs.md#8-submit-card-cvv).                                         |
-| **IntentForm**                     | Display the MoneyHash embed form using [`moneyHashSDK.renderForm`](doc/APIs.md#1-render-moneyhash-embed-form). Monitor the form submission outcome with `completionHandler`.                                                                                   |
-| **IntentProcessed**                | Render a success confirmation UI indicating the payment or payout completion with provided intent details.                                                                                                                                                      |
-| **TransactionWaitingUserAction**   | Show a UI element indicating the transaction awaits user action. If available, show any external action message required from `Transaction`.                                                                                                                    |
-| **TransactionFailed**              | Display a UI element indicating transaction failure. If `recommendedMethods` are provided, show these as alternative options for the user to retry the payment or payout.                                                                                       |
-| **Expired**                        | Show a message indicating that the intent has expired, prompting the user to initiate a new transaction.                                                                                                                                                        |
-| **Closed**                         | Show a message indicating that the intent has been closed and no further actions can be taken.                                                                                                                                                                  |
+| **UrlToRender**                    | Use the [`moneyHashSDK.renderForm`](doc/APIs.md#1-render-moneyhash-embed-form) to display the embed based on the URL provided.                                                                                                                                 |
+| **SavedCardCVV**                   | Render a CVV input field using `cvvField`. Optionally, display card information from [`cardTokenData`](doc/Models.md#3-cardtokendata). Submit the CVV using [`moneyHashSDK.submitCardCVV`](doc/APIs.md#8-submit-card-cvv).                                     |
+| **IntentForm**                     | Display the MoneyHash embed form using [`moneyHashSDK.renderForm`](doc/APIs.md#1-render-moneyhash-embed-form).                                                                                                                                                 |
+| **IntentProcessed**                | Render a success confirmation UI indicating the payment or payout completion with provided intent details.                                                                                                                                                     |
+| **TransactionWaitingUserAction**   | Show a UI element indicating the transaction awaits user action. If available, show any external action message required from `Transaction`.                                                                                                                   |
+| **TransactionFailed**              | Display a UI element indicating transaction failure. If `recommendedMethods` are provided, show these as alternative options for the user to retry the payment or payout.                                                                                      |
+| **Expired**                        | Show a message indicating that the intent has expired.                                                                                                                                                                                                         |
+| **Closed**                         | Show a message indicating that the intent has been closed and no further actions can be taken.                                                                                                                                                                 |
 
 ---
 
@@ -31,15 +31,15 @@ Handling method selection is a crucial part of integrating the MoneyHash SDK. Th
 #### Steps to Handle Method Selection
 
 1. **Display Payment Methods**:
-    - When the SDK state is `MethodSelection`, extract the `methods` object which contains the available payment options for the intent.
-    - Use your UI components to render these payment methods in a list or grid format, allowing the user to choose one.
+   - When the SDK state is `MethodSelection`, extract the `methods` object which contains the available payment options for the intent.
+   - Use your UI components to render these payment methods in a list or grid format, allowing the user to choose one.
 
 2. **Capture User Selection**:
-    - Implement an interactive element for each payment method. When a user selects a method, capture this selection and prepare to proceed with that method.
+   - Implement an interactive element for each payment method. When a user selects a method, capture this selection and prepare to proceed with that method.
 
 3. **Proceed with the Selected Method**:
-    - Use the [`moneyHashSDK.proceedWithMethod`](doc/APIs.md#6-proceed-with-selected-method) API call to initiate the payment process with the selected method.
-    - Pass the necessary parameters, such as `intentId`, `intentType`, `selectedMethodId`, and `methodType` to this function. Optionally, include any `methodMetaData` if required by the payment process.
+   - Use the [`moneyHashSDK.proceedWithMethod`](doc/APIs.md#6-proceed-with-selected-method) API call to initiate the payment process with the selected method.
+   - Pass the necessary parameters, such as `intentId`, `intentType`, `selectedMethodId`, and `methodType` to this function. Optionally, include any `methodMetaData` if required by the payment process.
 
 #### Example Implementation
 
@@ -60,8 +60,6 @@ Here’s an example of how you might implement this in your Flutter application:
     }
 ```
 
-This function builds a list where each payment method is represented by a list tile in the UI. When a user taps on a method, the [`proceedWithMethod`](doc/APIs.md#6-proceed-with-selected-method) function is called, using the details of the selected method to proceed with the payment process.
-
 ---
 ### Handling the `formFields` State
 
@@ -70,10 +68,10 @@ When handling the `FormFields` state in MoneyHash, you will deal with two primar
 #### Handling Billing or Shipping Data
 
 1. **Rendering Input Fields**:
-    - Use `InputField` data to render form fields. Each field type corresponds to an attribute like name, address, etc., and comes with specific properties to guide the rendering.
+   - Use `InputField` data to render form fields. Each field type corresponds to an attribute like name, address, etc., and comes with specific properties to guide the rendering.
 
 2. **Collecting User Input**:
-    - Capture input from these fields in the form of map of key as the field name and value is the user value.
+   - Capture input from these fields in the form of map of key as the field name and value is the user value.
 
 Example of handling billing data:
 ```dart
@@ -162,16 +160,16 @@ CardCollector buildCardCollector(CardFormBuilder cardFormBuilder) {
 ```
 
 3. **Implement Secure Text Fields:**
-    - For each card detail (holder name, number, CVV, expiry year, expiry month), implement a `SecureTextField` that binds to the `CardCollector`.
-    - `SecureTextField` should handle user inputs, validate them, and update their respective field state in the `CardCollector`.
+   - For each card detail (holder name, number, CVV, expiry year, expiry month), implement a `SecureTextField` that binds to the `CardCollector`.
+   - `SecureTextField` should handle user inputs, validate them, and update their respective field state in the `CardCollector`.
 
 4. **Collect and Validate Data:**
-    - Before attempting to tokenize the card data, validate all fields using the `CardCollector`'s `isValid` method.
-    - If validation passes, proceed to collect the data for tokenization.
+   - Before attempting to tokenize the card data, validate all fields using the `CardCollector`'s `isValid` method.
+   - If validation passes, proceed to collect the data for tokenization.
 
 5. **Tokenize and Handle Response:**
-    - Call the `collect` method on the `CardCollector` to initiate the tokenization process.
-    - Handle the response which includes either a token (on success) or error handling logic (on failure).
+   - Call the `collect` method on the `CardCollector` to initiate the tokenization process.
+   - Handle the response which includes either a token (on success) or error handling logic (on failure).
 
 #### Example Implementation
 
@@ -264,9 +262,23 @@ class CardDetailsForm extends StatelessWidget {
 #### Explanation:
 - **SecureTextField Widgets**: Each field is implemented as a `SecureTextField`, which is tied to the `CardCollector`. The fields handle user input, with the card number, card holder name, CVV, and expiry year, expiry month managed separately.
 - **Validation and Tokenization**: Before tokenization, the form checks if all fields are valid. If valid, it proceeds with tokenization; otherwise, it alerts the user to correct the inputs.
-- **Handling Responses**: Upon successful tokenization, the token is printed or used as needed. If tokenization fails, the error is handled appropriately.
+- **Handling Responses**: Upon successful tokenization, the token should be used to initiate the payment. If tokenization fails, the error is handled appropriately.
 
-This implementation ensures that card details are handled securely, following best practices for sensitive data management and compliance with security standards.
+---
+
+### Additional requirements for Android
+
+To be able to use the MoneyHash SDK on Android, you need to add the following activities to your `AndroidManifest.xml` file.
+
+```xml
+<activity android:name="com.moneyhash.sdk.android.payment.PaymentActivity"/>
+```
+
+```xml
+<activity android:name="com.moneyhash.sdk.android.payout.PayoutActivity"/>
+```
+For a detailed guide to all available APIs in the MoneyHash SDK for Flutter, including parameters, return types, and usage examples, refer to [this](doc/APIs.md) document. This includes methods for handling payments, retrieving intent details, submitting forms, and more.
+
 ---
 
 ### Overview of MoneyHash APIs
@@ -280,8 +292,6 @@ For a detailed guide to all available APIs in the MoneyHash SDK for Flutter, inc
 The MoneyHash SDK for Flutter features various models to represent data structures like intents, payment methods, transactions, and card information. For comprehensive details on these models, including their properties and usage within the SDK, see the [this](doc/Models.md) document.
 
 ---
-
-This documentation provides a comprehensive overview of integrating and utilizing the MoneyHash SDK in your Flutter applications. For more detailed information, please refer to the linked documentation files.
 
 ### Questions and Issues
 

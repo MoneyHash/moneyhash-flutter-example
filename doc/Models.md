@@ -691,4 +691,104 @@ class VaultData {
 
 ---
 
-This documentation provides a comprehensive overview of the models used in the Flutter version of the MoneyHash SDK, detailing each model's role, properties, and interactions within the SDK ecosystem. If you have any further questions or need additional details on any of the models, please let me know!
+#### 31. `FeesData`
+
+```dart
+class FeesData {
+  final String? amount;
+  final List<FeeItem>? fees;
+
+  FeesData({
+    this.amount,
+    this.fees,
+  });
+}
+```
+
+- **Description**: Represents the fees data associated with the intent.
+- **Properties**:
+  - `amount`: The total amount of the fees.
+  - `fees`: A list of FeeItem objects representing individual fees.
+
+---
+
+#### 32. `FeeItem`
+
+```dart
+class FeeItem {
+  final Map<Language, String> title;
+  final String value;
+  final DiscountItem? discount;
+
+  FeeItem({
+    required this.title,
+    required this.value,
+    this.discount,
+  });
+}
+```
+
+- **Description**: Represents an individual fee item, which may include a discount for this item
+- **Properties**:
+  - `title`: A map of titles by language, describing the fee.
+  - `value`: The value of the fee.
+  - `discount`: An optional `DiscountItem` associated with the fee.
+
+---
+
+#### 33. `DiscountItem`
+
+```dart
+class DiscountItem {
+  final Map<Language, String>? title;
+  final DiscountType? type;
+  final String? value;
+
+  DiscountItem({
+    this.title,
+    this.type,
+    this.value,
+  });
+}
+```
+
+- **Description**: Represents a discount applied to a fee or intent
+- **Properties**:
+  - `title`: A map of titles by language, describing the discount.
+  - `value`: The value of the discount.
+  - `type`: The type of discount (`DiscountType`), which can be either `amount` or `percentage`.
+
+---
+#### 34. `DiscountType`
+
+```dart
+enum DiscountType { amount, percentage }
+```
+
+- **Description**: Enum representing the type of discount.
+- **Enum Cases**:
+  - `amount`: The discount is a fixed amount.
+  - `percentage`: The discount is a percentage of the total.
+
+---
+#### 31. `DiscountData`
+
+```dart
+class DiscountData {
+  final DiscountItem? discount;
+  final String? amount;
+
+  DiscountData({
+    this.discount,
+    this.amount,
+  });
+}
+```
+
+- **Description**: Represents the data related to a discount applied to the intent.
+- **Properties**:
+  - `amount`: The `DiscountItem` associated with the intent.
+  - `discount`: A list of FeeItem objects representing individual fees.
+
+---
+
