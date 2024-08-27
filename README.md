@@ -47,17 +47,17 @@ Here’s an example of how you might implement this in your Flutter application:
 
 ```dart
     try {
-      // Assume you have already defined 'intentId' and 'intentType'
-      var result = await moneyHashSDK.proceedWithMethod(
-        intentId: "currentIntentId",
-        intentType: IntentType.payment, // or payout based on your application flow
-        selectedMethodId: method.id,
-        methodType: method.type,
-      );
-      print("Method proceeded successfully: $result");
-    } catch (e) {
-      print("Error proceeding with method: $e");
-    }
+// Assume you have already defined 'intentId' and 'intentType'
+var result = await moneyHashSDK.proceedWithMethod(
+intentId: "currentIntentId",
+intentType: IntentType.payment, // or payout based on your application flow
+selectedMethodId: method.id,
+methodType: method.type,
+);
+print("Method proceeded successfully: $result");
+} catch (e) {
+print("Error proceeding with method: $e");
+}
 ```
 
 ---
@@ -76,9 +76,9 @@ When handling the `FormFields` state in MoneyHash, you will deal with two primar
 Example of handling billing data:
 ```dart
 Map<String, String> billingData = {
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com"
+   "firstName": "John",
+   "lastName": "Doe",
+   "email": "john.doe@example.com"
 };
 ```
 
@@ -97,52 +97,52 @@ This step involves initializing the `CardFormBuilder` and setting up listeners f
 
 ```dart
 CardFormBuilder configureCardFormBuilder() {
-    // Initialize the builder
-    CardFormBuilder cardFormBuilder = CardFormBuilder();
+   // Initialize the builder
+   CardFormBuilder cardFormBuilder = CardFormBuilder();
 
-    // Set up listeners for each field
-    cardFormBuilder
-        .setCardNumberField((CardFieldState? state) {
-          if (state?.isValid ?? false) {
-            print("Card number is valid");
-          } else {
-            print("Card number error: ${state?.errorMessage}");
-          }
-        })
-        .setCVVField((CardFieldState? state) {
-          if (state?.isValid ?? false) {
-            print("CVV is valid");
-          } else {
-            print("CVV error: ${state?.errorMessage}");
-          }
-        })
-        .setCardHolderNameField((CardFieldState? state) {
-          if (state?.isValid ?? false) {
-            print("Card holder name is valid");
-          } else {
-            print("Card holder name error: ${state?.errorMessage}");
-          }
-        })
-        .setExpiryMonthField((CardFieldState? state) {
-          if (state?.isValid ?? false) {
-            print("Expiry month is valid");
-          } else {
-            print("Expiry month error: ${state?.errorMessage}");
-          }
-        })
-        .setExpiryYearField((CardFieldState? state) {
-          if (state?.isValid ?? false) {
-            print("Expiry year is valid");
-          } else {
-            print("Expiry year error: ${state?.errorMessage}");
-          }
-        });
+   // Set up listeners for each field
+   cardFormBuilder
+           .setCardNumberField((CardFieldState? state) {
+      if (state?.isValid ?? false) {
+         print("Card number is valid");
+      } else {
+         print("Card number error: ${state?.errorMessage}");
+      }
+   })
+           .setCVVField((CardFieldState? state) {
+      if (state?.isValid ?? false) {
+         print("CVV is valid");
+      } else {
+         print("CVV error: ${state?.errorMessage}");
+      }
+   })
+           .setCardHolderNameField((CardFieldState? state) {
+      if (state?.isValid ?? false) {
+         print("Card holder name is valid");
+      } else {
+         print("Card holder name error: ${state?.errorMessage}");
+      }
+   })
+           .setExpiryMonthField((CardFieldState? state) {
+      if (state?.isValid ?? false) {
+         print("Expiry month is valid");
+      } else {
+         print("Expiry month error: ${state?.errorMessage}");
+      }
+   })
+           .setExpiryYearField((CardFieldState? state) {
+      if (state?.isValid ?? false) {
+         print("Expiry year is valid");
+      } else {
+         print("Expiry year error: ${state?.errorMessage}");
+      }
+   });
 
-    // Assume TokenizeCardInfo is previously defined and set it
-    TokenizeCardInfo tokenizeCardInfo = TokenizeCardInfo(/* parameters */);
-    cardFormBuilder.setTokenizeCardInfo(tokenizeCardInfo);
+   // Assume TokenizeCardInfo is previously defined and set it
+   TokenizeCardInfo tokenizeCardInfo = TokenizeCardInfo(/* parameters */);
+   cardFormBuilder.setTokenizeCardInfo(tokenizeCardInfo);
 
-    return cardFormBuilder;
+   return cardFormBuilder;
 }
 ```
 
@@ -152,10 +152,10 @@ After configuring the `CardFormBuilder`, the next step is to build the `CardColl
 
 ```dart
 CardCollector buildCardCollector(CardFormBuilder cardFormBuilder) {
-    // Build the CardCollector from the configured CardFormBuilder
-    CardCollector cardCollector = cardFormBuilder.build();
+   // Build the CardCollector from the configured CardFormBuilder
+   CardCollector cardCollector = cardFormBuilder.build();
 
-    return cardCollector;
+   return cardCollector;
 }
 ```
 
@@ -175,87 +175,87 @@ CardCollector buildCardCollector(CardFormBuilder cardFormBuilder) {
 
 ```dart
 class CardDetailsForm extends StatelessWidget {
-  final CardCollector cardCollector;
+   final CardCollector cardCollector;
 
-  CardDetailsForm({Key? key, required this.cardCollector}) : super(key: key);
+   CardDetailsForm({Key? key, required this.cardCollector}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    // Card number field
-    SecureTextField cardNumberField = SecureTextField(
-      cardFormCollector: cardCollector,
-      type: CardFieldType.cardNumber,
-      placeholder: "Card Number",
-      label: "Card Number",
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.next,
-    );
-    
-    // Card holder name field
-    SecureTextField cardHolderNameField = SecureTextField(
-      cardFormCollector: cardCollector,
-      type: CardFieldType.cardHolderName,
-      placeholder: "Card Holder Name",
-      label: "Card Holder Name",
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.next,
-    );
+   @override
+   Widget build(BuildContext context) {
+      // Card number field
+      SecureTextField cardNumberField = SecureTextField(
+         cardFormCollector: cardCollector,
+         type: CardFieldType.cardNumber,
+         placeholder: "Card Number",
+         label: "Card Number",
+         keyboardType: TextInputType.number,
+         textInputAction: TextInputAction.next,
+      );
 
-    // CVV field
-    SecureTextField cvvField = SecureTextField(
-      cardFormCollector: cardCollector,
-      type: CardFieldType.cvv,
-      placeholder: "CVV",
-      label: "CVV",
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.next,
-    );
+      // Card holder name field
+      SecureTextField cardHolderNameField = SecureTextField(
+         cardFormCollector: cardCollector,
+         type: CardFieldType.cardHolderName,
+         placeholder: "Card Holder Name",
+         label: "Card Holder Name",
+         keyboardType: TextInputType.number,
+         textInputAction: TextInputAction.next,
+      );
 
-    // Expiry month field
-    SecureTextField expiryMonthField = SecureTextField(
-      cardFormCollector: cardCollector,
-      type: CardFieldType.expiryMonth,
-      placeholder: "MM",
-      label: "Expiry Month",
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.next,
-    );
-    
-        // Expiry year field
-    SecureTextField expiryYearField = SecureTextField(
-      cardFormCollector: cardCollector,
-      type: CardFieldType.expiryYear,
-      placeholder: "YY",
-      label: "Expiry Year",
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.done,
-    );
+      // CVV field
+      SecureTextField cvvField = SecureTextField(
+         cardFormCollector: cardCollector,
+         type: CardFieldType.cvv,
+         placeholder: "CVV",
+         label: "CVV",
+         keyboardType: TextInputType.number,
+         textInputAction: TextInputAction.next,
+      );
 
-    return Column(
-      children: [
-        cardNumberField,
-        cardHolderNameField,
-        cvvField,
-        expiryMonthField,
-        expiryYearField,
-        ElevatedButton(
-          onPressed: () async {
-            if (await cardCollector.isValid()) {
-              try {
-                VaultData? vaultData = await cardCollector.collect("intentId");
-                print("Tokenization successful: ${vaultData?.cardScheme}");
-              } catch (e) {
-                print("Tokenization failed: $e");
-              }
-            } else {
-              print("Validation failed");
-            }
-          },
-          child: Text('Tokenize and Submit'),
-        ),
-      ],
-    );
-  }
+      // Expiry month field
+      SecureTextField expiryMonthField = SecureTextField(
+         cardFormCollector: cardCollector,
+         type: CardFieldType.expiryMonth,
+         placeholder: "MM",
+         label: "Expiry Month",
+         keyboardType: TextInputType.number,
+         textInputAction: TextInputAction.next,
+      );
+
+      // Expiry year field
+      SecureTextField expiryYearField = SecureTextField(
+         cardFormCollector: cardCollector,
+         type: CardFieldType.expiryYear,
+         placeholder: "YY",
+         label: "Expiry Year",
+         keyboardType: TextInputType.number,
+         textInputAction: TextInputAction.done,
+      );
+
+      return Column(
+         children: [
+            cardNumberField,
+            cardHolderNameField,
+            cvvField,
+            expiryMonthField,
+            expiryYearField,
+            ElevatedButton(
+               onPressed: () async {
+                  if (await cardCollector.isValid()) {
+                     try {
+                        VaultData? vaultData = await cardCollector.collect("intentId");
+                        print("Tokenization successful: ${vaultData?.cardScheme}");
+                     } catch (e) {
+                        print("Tokenization failed: $e");
+                     }
+                  } else {
+                     print("Validation failed");
+                  }
+               },
+               child: Text('Tokenize and Submit'),
+            ),
+         ],
+      );
+   }
 }
 ```
 
@@ -268,15 +268,29 @@ class CardDetailsForm extends StatelessWidget {
 
 ### Additional requirements for Android
 
-To be able to use the MoneyHash SDK on Android, you need to add the following activities to your `AndroidManifest.xml` file.
+To use the MoneyHash SDK on Android, you must include the following activities in your AndroidManifest.xml file:
 
 ```xml
-<activity android:name="com.moneyhash.sdk.android.payment.PaymentActivity"/>
+<activity android:name="com.moneyhash.sdk.android.payment.PaymentActivity"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
 ```
 
 ```xml
-<activity android:name="com.moneyhash.sdk.android.payout.PayoutActivity"/>
+<activity android:name="com.moneyhash.sdk.android.payout.PayoutActivity"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
 ```
+
+To ensure these activities are displayed in full-screen mode, you can define a custom style in your styles.xml file, as shown below:
+
+```xml
+<style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowActionBar">false</item>
+    <item name="android:windowFullscreen">true</item>
+    <item name="android:windowContentOverlay">@null</item>
+</style>
+```
+
 For a detailed guide to all available APIs in the MoneyHash SDK for Flutter, including parameters, return types, and usage examples, refer to [this](doc/APIs.md) document. This includes methods for handling payments, retrieving intent details, submitting forms, and more.
 
 ---
