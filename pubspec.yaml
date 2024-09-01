@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  moneyhash_payment: ^2.0.4
+  moneyhash_payment: ^2.0.5
   cupertino_icons: ^1.0.2
 
 dev_dependencies:

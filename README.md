@@ -76,9 +76,9 @@ When handling the `FormFields` state in MoneyHash, you will deal with two primar
 Example of handling billing data:
 ```dart
 Map<String, String> billingData = {
-   "firstName": "John",
-   "lastName": "Doe",
-   "email": "john.doe@example.com"
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com"
 };
 ```
 
@@ -97,52 +97,57 @@ This step involves initializing the `CardFormBuilder` and setting up listeners f
 
 ```dart
 CardFormBuilder configureCardFormBuilder() {
-   // Initialize the builder
-   CardFormBuilder cardFormBuilder = CardFormBuilder();
+    // Initialize the builder
+    CardFormBuilder cardFormBuilder = CardFormBuilder();
 
-   // Set up listeners for each field
-   cardFormBuilder
-           .setCardNumberField((CardFieldState? state) {
-      if (state?.isValid ?? false) {
-         print("Card number is valid");
-      } else {
-         print("Card number error: ${state?.errorMessage}");
-      }
-   })
-           .setCVVField((CardFieldState? state) {
-      if (state?.isValid ?? false) {
-         print("CVV is valid");
-      } else {
-         print("CVV error: ${state?.errorMessage}");
-      }
-   })
-           .setCardHolderNameField((CardFieldState? state) {
-      if (state?.isValid ?? false) {
-         print("Card holder name is valid");
-      } else {
-         print("Card holder name error: ${state?.errorMessage}");
-      }
-   })
-           .setExpiryMonthField((CardFieldState? state) {
-      if (state?.isValid ?? false) {
-         print("Expiry month is valid");
-      } else {
-         print("Expiry month error: ${state?.errorMessage}");
-      }
-   })
-           .setExpiryYearField((CardFieldState? state) {
-      if (state?.isValid ?? false) {
-         print("Expiry year is valid");
-      } else {
-         print("Expiry year error: ${state?.errorMessage}");
-      }
-   });
+    // Set up listeners for each field
+    cardFormBuilder
+        .setCardNumberField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Card number is valid");
+          } else {
+            print("Card number error: ${state?.errorMessage}");
+          }
+        })
+        .setCVVField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("CVV is valid");
+          } else {
+            print("CVV error: ${state?.errorMessage}");
+          }
+        })
+        .setCardHolderNameField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Card holder name is valid");
+          } else {
+            print("Card holder name error: ${state?.errorMessage}");
+          }
+        })
+        .setExpiryMonthField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Expiry month is valid");
+          } else {
+            print("Expiry month error: ${state?.errorMessage}");
+          }
+        })
+        .setExpiryYearField((CardFieldState? state) {
+          if (state?.isValid ?? false) {
+            print("Expiry year is valid");
+          } else {
+            print("Expiry year error: ${state?.errorMessage}");
+          }
+        })
+        .setCardBrandChangeListener((cardBrand) {
+          print("CardBrand: ${cardBrand?.brand}");
+          print("CardBrand: ${cardBrand?.brandIconUrl}");
+          print("CardBrand: ${cardBrand?.first6Digits}");
+    });
 
-   // Assume TokenizeCardInfo is previously defined and set it
-   TokenizeCardInfo tokenizeCardInfo = TokenizeCardInfo(/* parameters */);
-   cardFormBuilder.setTokenizeCardInfo(tokenizeCardInfo);
+    // You will get the tokenized card info from `FormFields` state, and you need to pass it here
+    TokenizeCardInfo tokenizeCardInfo = TokenizeCardInfo(/* parameters */);
+    cardFormBuilder.setTokenizeCardInfo(tokenizeCardInfo);
 
-   return cardFormBuilder;
+    return cardFormBuilder;
 }
 ```
 
@@ -152,10 +157,10 @@ After configuring the `CardFormBuilder`, the next step is to build the `CardColl
 
 ```dart
 CardCollector buildCardCollector(CardFormBuilder cardFormBuilder) {
-   // Build the CardCollector from the configured CardFormBuilder
-   CardCollector cardCollector = cardFormBuilder.build();
+    // Build the CardCollector from the configured CardFormBuilder
+    CardCollector cardCollector = cardFormBuilder.build();
 
-   return cardCollector;
+    return cardCollector;
 }
 ```
 
@@ -277,17 +282,17 @@ To use the MoneyHash SDK on Android, you must include the following activities i
 
 ```xml
 <activity android:name="com.moneyhash.sdk.android.payout.PayoutActivity"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
 ```
 
 To ensure these activities are displayed in full-screen mode, you can define a custom style in your styles.xml file, as shown below:
 
 ```xml
 <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:windowActionBar">false</item>
-    <item name="android:windowFullscreen">true</item>
-    <item name="android:windowContentOverlay">@null</item>
+   <item name="android:windowNoTitle">true</item>
+   <item name="android:windowActionBar">false</item>
+   <item name="android:windowFullscreen">true</item>
+   <item name="android:windowContentOverlay">@null</item>
 </style>
 ```
 
