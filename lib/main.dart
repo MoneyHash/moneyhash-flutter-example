@@ -1,13 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:moneyhash_payment/data/card/card_field_type.dart';
-import 'package:moneyhash_payment/data/tokenize_card_info.dart';
-import 'package:moneyhash_payment/data/vault_data.dart';
+import 'package:moneyhash_payment/data/intent_methods.dart';
+import 'package:moneyhash_payment/data/intent_type.dart';
+import 'package:moneyhash_payment/data/methods/get_methods_params.dart';
+import 'package:moneyhash_payment/log/log_level.dart';
 import 'package:moneyhash_payment/vault/card_collector.dart';
 import 'package:moneyhash_payment/vault/widget/secure_text_field.dart';
 import 'package:moneyhash_payment/vault/card_form_builder.dart';
 import 'package:moneyhash_payment/moneyhash_payment.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -38,43 +38,34 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  CardCollector? _cardCollector;
-  String intentId = "LPMzr1g";
-  String accessToken = "eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MjQwMzQwNTF9.cQFf20PKO0IElvzn3mzBvpdWnRfz0DoKkmcpq-xwhvM_TMkyYt4uKo03N3T02xRnFgJzZrcuoN1AQFXK5whmOg";
+  CardForm? _cardForm;
+  String intentId = "Your intent id";
 
   MoneyHashSDK moneyHashSDK = MoneyHashSDKBuilder.build();
 
-
   @override
   void initState() {
-    _cardCollector = CardFormBuilder()
-        .setCardHolderNameField((state) {
+    moneyHashSDK.setLogLevel(LogLevel.debug);
+    _cardForm = CardFormBuilder().setCardHolderNameField((state) {
       print("CardHolderName: ${state?.isValid}");
       print("CardHolderName: ${state?.errorMessage}");
-    })
-        .setCardNumberField((state) {
+    }).setCardNumberField((state) {
       print("CardNumber: ${state?.isValid}");
       print("CardNumber: ${state?.errorMessage}");
-    })
-        .setCVVField((state) {
+    }).setCVVField((state) {
       print("CVV: ${state?.isValid}");
       print("CVV: ${state?.errorMessage}");
-    })
-        .setExpiryMonthField((state) {
+    }).setExpiryMonthField((state) {
       print("ExpireMonth: ${state?.isValid}");
       print("ExpireMonth: ${state?.errorMessage}");
-    })
-        .setExpiryYearField((state) {
+    }).setExpiryYearField((state) {
       print("ExpireYear: ${state?.isValid}");
       print("ExpireYear: ${state?.errorMessage}");
-    })
-        .setTokenizeCardInfo(TokenizeCardInfo(
-        accessToken: accessToken,
-        isLive: true,
-        saveCard: true,
-        saveCardCheckbox: SaveCardCheckbox()))
-        .build();
-
+    }).setCardBrandChangeListener((cardBrand) {
+      print("CardBrand: ${cardBrand?.brand}");
+      print("CardBrand: ${cardBrand?.brandIconUrl}");
+      print("CardBrand: ${cardBrand?.first6Digits}");
+    }).build();
 
     super.initState();
   }
@@ -84,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("MoneyHash Flutter Example"),
+        title: const Text("Testing card"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -94,46 +85,73 @@ class _MyHomePageState extends State<MyHomePage> {
             SecureTextField(
               label: "cardNumber",
               placeholder: "cardNumber",
-              cardFormCollector: _cardCollector!,
+              cardForm: _cardForm!,
               type: CardFieldType.cardNumber,
             ),
             const SizedBox(height: 16),
             SecureTextField(
               label: "cvv",
               placeholder: "cvv",
-              cardFormCollector: _cardCollector!,
+              cardForm: _cardForm!,
               type: CardFieldType.cvv,
             ),
             const SizedBox(height: 16),
             SecureTextField(
               label: "expireMonth",
               placeholder: "expireMonth",
-              cardFormCollector: _cardCollector!,
+              cardForm: _cardForm!,
               type: CardFieldType.expiryMonth,
             ),
             const SizedBox(height: 16),
             SecureTextField(
               label: "cardHolderName",
               placeholder: "cardHolderName",
-              cardFormCollector: _cardCollector!,
+              cardForm: _cardForm!,
               type: CardFieldType.cardHolderName,
             ),
             SecureTextField(
               label: "expireYear",
               placeholder: "expireYear",
-              cardFormCollector: _cardCollector!,
+              cardForm: _cardForm!,
               type: CardFieldType.expiryYear,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
                 onPressed: () async {
-                  bool? isValid = await _cardCollector?.isValid();
-                  print("isValid: $isValid");
-                  VaultData? result = await _cardCollector?.collect(intentId);
-                  print("_cardFormCollector collect expiryYear: ${result?.expiryYear}");
-                  print("_cardFormCollector collect expiryMonth: ${result?.expiryMonth}");
-                  print("_cardFormCollector collect cardHolderName: ${result?.cardHolderName}");
-                  print("_cardFormCollector collect cardScheme: ${result?.cardScheme}");
+                  moneyHashSDK.setPublicKey("Your public key");
+                  var intentMethods = await moneyHashSDK.getMethods(GetMethodsParams.withIntent(intentId, IntentType.payment));
+                  print("Methods: $intentMethods");
+                  //
+                  var accountMethods = await moneyHashSDK.getMethods(
+                      GetMethodsParams.withCurrency(currency: "USD", customer: "8fa8912f-e321-4899-8759-b8136fe95523", flowId: null, amount: null)
+                  );
+                  print("Methods: $accountMethods");
+
+
+                  var intentDetails = await moneyHashSDK.getIntentDetails(intentId, IntentType.payment);
+                  var intentAmount = intentDetails.intent?.amount;
+                  print("intentAmount: $intentAmount");
+
+                  var collectResult = await _cardForm?.collect();
+                  print("CollectResult: ${collectResult?.cardHolderName}");
+                  print("CollectResult: ${collectResult?.expiryMonth}");
+
+
+                  // Set the intent method to Card before proceeding to payment
+                  await moneyHashSDK.proceedWithMethod(intentId, IntentType.payment, "CARD", MethodType.paymentMethod, null);
+
+                  var payResult = await _cardForm?.pay(
+                    intentId,
+                    collectResult!,
+                    true,
+                    null,
+                    null,
+                  );
+                  print("PayResult: ${payResult?.transaction?.amount}");
+                  print("PayResult: ${payResult?.transaction?.amountCurrency}");
+
+                  var cardTokenResult = await _cardForm?.createCardToken("CardIntentId", collectResult!);
+                  print("Card Token Result: $cardTokenResult");
                 },
                 child: const Text("Submit"))
           ],
